@@ -61,6 +61,7 @@ func main() {
 	flag.Parse()
 
 	logger, reconfigurableSink := lagerflags.New("routing-api")
+	logger.Error("using the sni version of the routing release")
 
 	err := checkFlags()
 	if err != nil {
