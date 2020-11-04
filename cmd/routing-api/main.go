@@ -42,8 +42,8 @@ import (
 )
 
 const (
-	routingApiLockPath = "routing_api_lock"
-	sessionName        = "routing_api"
+	routingApiLockPath = "sni_routing_api_lock"
+	sessionName        = "sni_routing_api"
 	pruningInterval    = 10 * time.Second
 )
 
