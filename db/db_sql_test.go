@@ -1,6 +1,7 @@
 package db_test
 
 import (
+	"code.cloudfoundry.org/routing-api/cmd/routing-api/testrunner"
 	"errors"
 	"fmt"
 	"os"
@@ -359,7 +360,11 @@ var _ = Describe("SqlDB", func() {
 					Expect(failedSqlDB).To(BeNil())
 				})
 			})
+		})
+	}
 
+	Authentication := func() {
+		Describe("Connection", func() {
 			Context("when authentication fails", func() {
 				var badAuthConfig config.SqlDB
 				BeforeEach(func() {
@@ -374,7 +379,11 @@ var _ = Describe("SqlDB", func() {
 					Expect(failedSqlDB).To(BeNil())
 				})
 			})
+		})
+	}
 
+	ConnectionFailure := func() {
+		Describe("Connection", func() {
 			Context("when connecting to SQL DB fails", func() {
 				var badPortConfig config.SqlDB
 				BeforeEach(func() {
@@ -1792,14 +1801,21 @@ var _ = Describe("SqlDB", func() {
 
 	Describe("Test with Mysql", func() {
 		var (
-			err error
+			err       error
+			allocator = testrunner.NewPostgresAllocator()
 		)
 
 		BeforeEach(func() {
-			sqlCfg = mysqlCfg
+			sqlCfg, err = allocator.Create()
+			Expect(err).ToNot(HaveOccurred())
 			sqlDB, err = db.NewSqlDB(sqlCfg)
 			Expect(err).ToNot(HaveOccurred())
 			err = migration.NewV0InitMigration().Run(sqlDB)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		AfterEach(func() {
+			err = allocator.Delete()
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -1819,18 +1835,27 @@ var _ = Describe("SqlDB", func() {
 		SaveRouterGroup()
 		DeleteRouterGroup()
 		Connection()
+		Authentication()
+		ConnectionFailure()
 	})
 
 	Describe("Test with Postgres", func() {
 		var (
-			err error
+			err       error
+			allocator = testrunner.NewPostgresAllocator()
 		)
 
 		BeforeEach(func() {
-			sqlCfg = postgresCfg
+			sqlCfg, err = allocator.Create()
+			Expect(err).ToNot(HaveOccurred())
 			sqlDB, err = db.NewSqlDB(sqlCfg)
 			Expect(err).ToNot(HaveOccurred())
 			err = migration.NewV0InitMigration().Run(sqlDB)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		AfterEach(func() {
+			err = allocator.Delete()
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -1850,8 +1875,46 @@ var _ = Describe("SqlDB", func() {
 		SaveRouterGroup()
 		DeleteRouterGroup()
 		Connection()
+		Authentication()
+		ConnectionFailure()
 	})
 
+	Describe("Test with SQLite", func() {
+		var (
+			err       error
+			allocator = testrunner.NewSQLiteAllocator()
+		)
+
+		BeforeEach(func() {
+			sqlCfg, err = allocator.Create()
+			Expect(err).ToNot(HaveOccurred())
+			sqlDB, err = db.NewSqlDB(sqlCfg)
+			Expect(err).ToNot(HaveOccurred())
+			err = migration.NewV0InitMigration().Run(sqlDB)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		AfterEach(func() {
+			err = allocator.Delete()
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		CleanupRoutes()
+		WatcherRouteChanges()
+		DeleteRoute()
+		ReadRoute()
+		SaveRoute()
+		DeleteTcpRouteMapping()
+		ReadTcpRouteMappings()
+		ReadFilteredTcpRouteMappings()
+		SaveTcpRouteMapping()
+		ReadRouterGroup()
+		ReadRouterGroupByName()
+		ReadRouterGroups()
+		SaveRouterGroup()
+		DeleteRouterGroup()
+		Connection()
+	})
 })
 
 func newUuid() string {
