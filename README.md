@@ -27,6 +27,14 @@ To run the tests you need a running RDB(either Postgres or MySQL). Currently the
 If you choose to run unit-tests without docker(mentioned above), you will need to run SQL locally with the below configuration:
 [MySQL](https://github.com/cloudfoundry/routing-api/blob/5e1c34582d6c5a288e0bfd18968dab98f2dfbb29/cmd/routing-api/testrunner/runner.go#L174-L180)
 [Postgres](https://github.com/cloudfoundry/routing-api/blob/5e1c34582d6c5a288e0bfd18968dab98f2dfbb29/cmd/routing-api/testrunner/runner.go#L138-L143)
+### Local Database Instances in Docker
+A Docker Compose is provided to start the database locally for testing.
+```console
+$ docker-compose up
+...
+postgress_1  | 2020-11-12 18:00:21.618 UTC [1] LOG:  database system is ready to accept connections
+mysql_1      | [Entrypoint] Starting MySQL 5.7.32-1.1.18
+```
 
 ## Running the API Server
 
