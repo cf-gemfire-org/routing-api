@@ -12,6 +12,7 @@ import (
 	"code.cloudfoundry.org/routing-api/config"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	. "github.com/onsi/ginkgo"
 )
 
@@ -20,6 +21,12 @@ type DbAllocator interface {
 	Reset() error
 	Delete() error
 	minConfig() *config.SqlDB
+}
+
+type sqliteAllocator struct {
+	sqlDB      *sql.DB
+	schemaName string
+	dbFile     string
 }
 
 type mysqlAllocator struct {
@@ -189,4 +196,49 @@ func (a *mysqlAllocator) Delete() error {
 	}()
 	_, err := a.sqlDB.Exec(fmt.Sprintf("DROP DATABASE %s", a.schemaName))
 	return err
+}
+
+func NewSQLiteAllocator() DbAllocator {
+	return &sqliteAllocator{schemaName: randSchemaName()}
+}
+
+func (a *sqliteAllocator) Create() (*config.SqlDB, error) {
+	var (
+		err error
+		cfg *config.SqlDB
+	)
+
+	cfg = a.minConfig()
+	a.dbFile = db.SqlLiteDatabaseFile(cfg)
+	connStr, err := db.ConnectionString(cfg)
+	if err != nil {
+		return nil, err
+	}
+	a.sqlDB, err = sql.Open("sqlite3", connStr)
+	if err != nil {
+		return nil, err
+	}
+	err = a.sqlDB.Ping()
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (a *sqliteAllocator) Reset() error {
+	_ = a.Delete()
+	_, err := a.Create()
+	return err
+}
+
+func (a *sqliteAllocator) Delete() error {
+	_ = a.sqlDB.Close()
+	return os.Remove(a.dbFile)
+}
+
+func (a *sqliteAllocator) minConfig() *config.SqlDB {
+	return &config.SqlDB{
+		Type:   "sqlite3",
+		Schema: a.schemaName,
+	}
 }

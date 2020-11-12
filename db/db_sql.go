@@ -19,6 +19,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 //go:generate counterfeiter -o fakes/fake_db.go . DB
@@ -104,7 +105,7 @@ func NewSqlDB(cfg *config.SqlDB) (*SqlDB, error) {
 		return nil, errors.New("SQL configuration cannot be nil")
 	}
 
-	if cfg.Type != "mysql" && cfg.Type != "postgres" {
+	if cfg.Type != "mysql" && cfg.Type != "postgres" && cfg.Type != "sqlite3" {
 		return &SqlDB{}, errors.New(fmt.Sprintf("Unknown type %s", cfg.Type))
 	}
 
@@ -619,6 +620,10 @@ func recordNotFound(err error) bool {
 func ConnectionString(cfg *config.SqlDB) (string, error) {
 	var connectionString string
 	switch cfg.Type {
+	case "sqlite3":
+		dbFile := SqlLiteDatabaseFile(cfg)
+		return fmt.Sprintf("file:%s", dbFile), nil
+
 	case "mysql":
 		connStringBuilder := &MySQLConnectionStringBuilder{MySQLAdapter: &MySQLAdapter{}}
 		return connStringBuilder.Build(cfg)
@@ -655,4 +660,8 @@ func ConnectionString(cfg *config.SqlDB) (string, error) {
 	}
 
 	return connectionString, nil
+}
+
+func SqlLiteDatabaseFile(cfg *config.SqlDB) string {
+	return fmt.Sprintf("%s.db", cfg.Schema)
 }
