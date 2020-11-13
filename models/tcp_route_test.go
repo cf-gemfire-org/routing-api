@@ -52,12 +52,12 @@ var _ = Describe("TCP Route", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(string(j)).NotTo(ContainSubstring("backend_sni_hostname"))
 			})
-			It("JSON omits when empty", func() {
+			It("JSON contains when empty", func() {
 				sniHostname := ""
 				tcpRouteMapping := NewSniTcpRouteMapping("a-guid", 1234, &sniHostname, "hostIp", 5678, 5)
 				j, err := json.Marshal(tcpRouteMapping)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(string(j)).NotTo(ContainSubstring("backend_sni_hostname"))
+				Expect(string(j)).To(ContainSubstring("backend_sni_hostname"))
 			})
 			It("JSON contains when not nil", func() {
 				sniHostname := "sniHostname"
