@@ -619,6 +619,7 @@ func recordNotFound(err error) bool {
 
 func ConnectionString(cfg *config.SqlDB) (string, error) {
 	var connectionString string
+	fmt.Printf("cfgType:"+cfg.Type)
 	switch cfg.Type {
 	case "sqlite3":
 		dbFile := SqlLiteDatabaseFile(cfg)
