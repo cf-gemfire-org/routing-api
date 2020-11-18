@@ -667,6 +667,5 @@ func ConnectionString(cfg *config.SqlDB) (string, error) {
 
 func SqlLiteDatabaseFile(cfg *config.SqlDB) string {
 	filename := fmt.Sprintf("%s.db", cfg.Schema)
-	wd, err := os.Getwd()
 	return filename
 }
