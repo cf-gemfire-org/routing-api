@@ -52,6 +52,7 @@ func route(f func(w http.ResponseWriter, r *http.Request)) http.Handler {
 }
 
 func main() {
+	fmt.Print("HERERERERERE")
 	lagerflags.AddFlags(flag.CommandLine)
 	flag.Parse()
 
