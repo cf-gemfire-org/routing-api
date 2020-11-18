@@ -623,7 +623,7 @@ func ConnectionString(cfg *config.SqlDB) (string, error) {
 	switch cfg.Type {
 	case "sqlite3":
 		dbFile := SqlLiteDatabaseFile(cfg)
-		return fmt.Sprintf("file:%s?mode=rwc", dbFile), nil
+		return fmt.Sprintf("file:/var/vcap/store/%s?mode=rwc", dbFile), nil
 
 	case "mysql":
 		connStringBuilder := &MySQLConnectionStringBuilder{MySQLAdapter: &MySQLAdapter{}}
