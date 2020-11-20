@@ -621,8 +621,8 @@ func ConnectionString(cfg *config.SqlDB) (string, error) {
 	var connectionString string
 	switch cfg.Type {
 	case "sqlite3":
-		dbFile := SqlLiteDatabaseFile(cfg)
-		return fmt.Sprintf("file:%s", dbFile), nil
+		dbFileFull := fmt.Sprintf("file:%s?mode=rwc", SqlLiteDatabaseFile(cfg))
+		return dbFileFull, nil
 
 	case "mysql":
 		connStringBuilder := &MySQLConnectionStringBuilder{MySQLAdapter: &MySQLAdapter{}}
@@ -663,5 +663,6 @@ func ConnectionString(cfg *config.SqlDB) (string, error) {
 }
 
 func SqlLiteDatabaseFile(cfg *config.SqlDB) string {
-	return fmt.Sprintf("%s.db", cfg.Schema)
+	filename := fmt.Sprintf("%s/%s.db", cfg.StorePath, cfg.Schema)
+	return filename
 }

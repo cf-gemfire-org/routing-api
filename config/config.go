@@ -43,6 +43,7 @@ type SqlDB struct {
 	MaxIdleConns           int    `yaml:"max_idle_connections"`
 	MaxOpenConns           int    `yaml:"max_open_connections"`
 	ConnMaxLifetime        int    `yaml:"connections_max_lifetime_seconds"`
+	StorePath              string `yaml:"store_path"`
 }
 
 type APIConfig struct {

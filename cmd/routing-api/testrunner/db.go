@@ -240,5 +240,6 @@ func (a *sqliteAllocator) minConfig() *config.SqlDB {
 	return &config.SqlDB{
 		Type:   "sqlite3",
 		Schema: a.schemaName,
+		StorePath: ".",
 	}
 }
